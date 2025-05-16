@@ -1,41 +1,21 @@
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
+import { getUserRepositories } from "@/lib/api";
 
-// This is a mock implementation - in a real app, you would fetch
-// repositories from your database
-export async function GET() {
-  // Mock data for demonstration
-  const repositories = [
-    {
-      id: "1",
-      name: "API Documentation",
-      dateAdded: "Jun 15, 2023",
-      url: "https://github.com/user/api-docs",
-    },
-    {
-      id: "2",
-      name: "User Authentication Flow",
-      dateAdded: "Jun 14, 2023",
-      url: "https://github.com/user/auth-flow",
-    },
-    {
-      id: "3",
-      name: "Payment Integration",
-      dateAdded: "Mar 4, 2024",
-      url: "https://github.com/user/payment-integration",
-    },
-    {
-      id: "4",
-      name: "Frontend Components",
-      dateAdded: "Apr 12, 2024",
-      url: "https://github.com/user/frontend-components",
-    },
-    {
-      id: "5",
-      name: "Database Schema",
-      dateAdded: "Jun 29, 2023",
-      url: "https://github.com/user/db-schema",
-    },
-  ]
+export async function GET(request: Request) {
+  try {
+    const token = request.headers.get("authorization")?.split(" ")[1];
 
-  return NextResponse.json(repositories)
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const repositories = await getUserRepositories(token);
+    return NextResponse.json(repositories);
+  } catch (error) {
+    console.error("Error fetching repositories:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch repositories" },
+      { status: 500 }
+    );
+  }
 }
